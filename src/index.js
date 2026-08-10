@@ -96,6 +96,7 @@ export default {
 };
 
 // ---------- CHAT HANDLER ----------
+console.log('Chat request received with messages:', messages);
 async function handleChat(request, ai, githubProjects, githubMemory, env) {
   const body = await request.json();
   const messages = body.messages || [];
