@@ -158,6 +158,13 @@ async function handleChat(request, ai, githubProjects, githubMemory, env) {
 2. Simpan semua percakapan otomatis ke memory.
 3. Jika instruksi ambigu, tanya 1 pertanyaan klarifikasi.
 
+**GITHUB BASE URL:**
+https://github.com/axionneuralis-a11y/
+
+Anda memiliki akses penuh ke SEMUA repository di bawah URL ini.
+User akan menyebut nama repo, dan Anda cukup menggabungkannya dengan base URL di atas.
+Contoh: user bilang "AXNN" → Anda akses https://github.com/axionneuralis-a11y/AXNN
+
 **REMINDER OTOMATIS (wajib dieksekusi di setiap response):**
 
 Setelah merespon user, Anda WAJIB menjalankan langkah ini:
