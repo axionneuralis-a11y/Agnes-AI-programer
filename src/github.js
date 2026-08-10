@@ -28,7 +28,9 @@ export class GitHubAPI {
   async getFile(path) {
     try {
       const data = await this.request(`/contents/${path}`);
-      return { content: atob(data.content), sha: data.sha };
+      // Decode Base64 dengan dukungan UTF-8
+      const content = decodeURIComponent(escape(atob(data.content)));
+      return { content, sha: data.sha };
     } catch (e) {
       if (e.message.includes('404')) return null;
       throw e;
@@ -36,9 +38,11 @@ export class GitHubAPI {
   }
 
   async createOrUpdateFile(path, content, message, sha = null) {
+    // Encode content ke Base64 dengan dukungan UTF-8
+    const encoded = btoa(unescape(encodeURIComponent(content)));
     const body = {
       message,
-      content: btoa(content),
+      content: encoded,
       branch: 'main',
     };
     if (sha) body.sha = sha;
@@ -65,4 +69,4 @@ export class GitHubAPI {
     const data = await this.request('/git/trees/main?recursive=true');
     return data.tree;
   }
-                    } 
+        }
