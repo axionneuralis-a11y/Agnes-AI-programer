@@ -1,4 +1,4 @@
-import { jsonResponse, errorResponse } from './utils';
+import { jsonResponse, errorResponse, CORS_HEADERS } from './utils';
 import { GitHubAPI } from './github';
 import { AgnesAI } from './ai';
 
@@ -9,7 +9,7 @@ export default {
 
     // OPTIONS preflight (CORS)
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
+      return new Response(null, { headers: CORS_HEADERS });
     }
 
     const githubProjects = new GitHubAPI(env.GITHUB_TOKEN, env.GITHUB_PROJECTS_REPO);
@@ -96,7 +96,6 @@ export default {
 };
 
 // ---------- CHAT HANDLER ----------
-console.log('Chat request received with messages:', messages);
 async function handleChat(request, ai, githubProjects, githubMemory, env) {
   const body = await request.json();
   const messages = body.messages || [];
@@ -144,7 +143,7 @@ TOOLS:
 8. list_files       → { "project": "x", "path": "" }
 
 Jika tidak ada tool, kirim "tool_calls": [].
-Jangan membuat asumsi, tanyakan jika kurang jelas.
+Jangan membuat asumsi, tanyakan jika kurang jelas. dan semua percakapan harus anda simpan ke memory di repository https://github.com/axionneuralis-a11y/memory . dan pastikan, setiap memory yang di simpan, itu adalah per project, jadi saat saya memilih project tertentu, berarti, anda harus membaca memory di folder memory yang bersangkutan, jadi, anda nama kan sendiri, di repository memory sesuai project, agar anda juga lebih mudah membedakannya.
 `;
 
   // Gabungkan system prompt ke pesan user terakhir (Agnes API tidak support system role)
@@ -270,4 +269,4 @@ async function executeTool(tool, githubProjects, githubMemory) {
   } catch (err) {
     return { success: false, error: err.message };
   }
-          }
+      }
