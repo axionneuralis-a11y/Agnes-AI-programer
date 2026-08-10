@@ -155,10 +155,24 @@ Jika tidak ada tool, kirim "tool_calls": [].
 Jangan membuat asumsi, tanyakan jika kurang jelas.
 `;
 
-  const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
+  // Gabungkan system prompt ke pesan user terakhir (Agnes API tidak support system role)
+  let modifiedMessages = [...messages];
+  let lastUserIndex = -1;
+  for (let i = modifiedMessages.length - 1; i >= 0; i--) {
+    if (modifiedMessages[i].role === 'user') {
+      lastUserIndex = i;
+      break;
+    }
+  }
+  if (lastUserIndex !== -1) {
+    modifiedMessages[lastUserIndex].content = systemPrompt + "\n\n" + modifiedMessages[lastUserIndex].content;
+  } else {
+    // Jika tidak ada pesan user, tambahkan sebagai user
+    modifiedMessages.push({ role: 'user', content: systemPrompt });
+  }
 
   try {
-    const result = await ai.call(fullMessages, { temperature: 0.7 });
+    const result = await ai.call(modifiedMessages, { temperature: 0.7 });
     const raw = result.choices[0].message.content;
 
     let parsed;
@@ -242,4 +256,4 @@ async function executeTool(tool, githubProjects, githubMemory) {
   } catch (err) {
     return { success: false, error: err.message };
   }
-          }
+  }
