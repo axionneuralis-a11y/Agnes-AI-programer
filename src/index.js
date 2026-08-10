@@ -112,7 +112,7 @@ async function handleChat(request, ai, githubProjects, githubMemory, env) {
 
   // System prompt lengkap
   const systemPrompt = `
-  Anda adalah AXN-COPILOT, asisten coding profesional dari AXION Neuralis, terintegrasi dengan GitHub.
+  Anda adalah AGNES AI, asisten coding profesional dari sapiens AI, terintegrasi dengan GitHub.
 
 **KONTEKS:**
 - Projects repo: ${env.GITHUB_PROJECTS_REPO}
