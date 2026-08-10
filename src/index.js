@@ -1,4 +1,4 @@
-import { jsonResponse, errorResponse, CORS_HEADERS } from './utils';
+import { jsonResponse, errorResponse } from './utils';
 import { GitHubAPI } from './github';
 import { AgnesAI } from './ai';
 
@@ -7,9 +7,9 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // Tangani preflight OPTIONS
+    // OPTIONS preflight (CORS)
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: CORS_HEADERS });
+      return new Response(null, { headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
     const githubProjects = new GitHubAPI(env.GITHUB_TOKEN, env.GITHUB_PROJECTS_REPO);
@@ -17,12 +17,12 @@ export default {
     const ai = new AgnesAI(env);
 
     try {
-      // ---------- CHAT ----------
+      // ----- CHAT -----
       if (path === '/api/chat' && request.method === 'POST') {
         return handleChat(request, ai, githubProjects, githubMemory, env);
       }
 
-      // ---------- PROJECTS ----------
+      // ----- PROJECTS -----
       if (path === '/api/projects' && request.method === 'GET') {
         const data = await githubProjects.listDirectory('');
         return jsonResponse(data);
@@ -67,7 +67,7 @@ export default {
         return jsonResponse({ success: true });
       }
 
-      // ---------- MEMORY ----------
+      // ----- MEMORY -----
       if (path === '/api/memory' && request.method === 'GET') {
         const data = await githubMemory.listDirectory('');
         return jsonResponse(data);
@@ -87,7 +87,6 @@ export default {
         return jsonResponse(data);
       }
 
-      // ---------- FALLBACK ----------
       return errorResponse('Not found', 404);
     } catch (err) {
       console.error('Worker error:', err);
@@ -98,28 +97,20 @@ export default {
 
 // ---------- CHAT HANDLER ----------
 async function handleChat(request, ai, githubProjects, githubMemory, env) {
-  const { messages, project } = await request.json();
+  const body = await request.json();
+  const messages = body.messages || [];
+  const project = body.project || null;
 
-  // Context: project files
-  let projectContext = '';
-  if (project) {
-    try {
-      const files = await githubProjects.listDirectory(project);
-      projectContext = `Project "${project}" contains: ${files.map(f => f.name).join(', ')}`;
-    } catch {
-      projectContext = `Project "${project}" not found or empty.`;
-    }
+  // Validasi: harus ada setidaknya satu pesan
+  if (!messages.length) {
+    return errorResponse('Messages array cannot be empty', 400);
   }
 
-  // Context: memory
-  let memoryContext = '';
-  try {
-    const mems = await githubMemory.listDirectory('');
-    memoryContext = `Memory files: ${mems.map(f => f.name).join(', ')}`;
-  } catch {
-    memoryContext = 'No memory files found.';
-  }
+  // Ambil konteks project dan memory
+  const projectContext = await getProjectContext(githubProjects, project);
+  const memoryContext = await getMemoryContext(githubMemory);
 
+  // System prompt lengkap
   const systemPrompt = `
 Anda adalah Agnes AI, asisten coding profesional yang terhubung dengan GitHub.
 
@@ -164,25 +155,28 @@ Jangan membuat asumsi, tanyakan jika kurang jelas.
       break;
     }
   }
+
   if (lastUserIndex !== -1) {
-    modifiedMessages[lastUserIndex].content = systemPrompt + "\n\n" + modifiedMessages[lastUserIndex].content;
+    modifiedMessages[lastUserIndex].content = systemPrompt + '\n\n' + modifiedMessages[lastUserIndex].content;
   } else {
-    // Jika tidak ada pesan user, tambahkan sebagai user
-    modifiedMessages.push({ role: 'user', content: systemPrompt });
+    // Fallback aman (seharusnya tidak terjadi karena validasi di atas)
+    modifiedMessages.push({ role: 'user', content: systemPrompt + '\n\nHalo' });
   }
 
   try {
     const result = await ai.call(modifiedMessages, { temperature: 0.7 });
     const raw = result.choices[0].message.content;
 
+    // Coba parse JSON
     let parsed;
     try {
       parsed = JSON.parse(raw);
     } catch {
-      // plain text response
+      // Jika bukan JSON, kirim plain text
       return jsonResponse({ response: raw, tool_calls: [] });
     }
 
+    // Eksekusi tool calls jika ada
     const toolResults = [];
     if (parsed.tool_calls?.length) {
       for (const tool of parsed.tool_calls) {
@@ -199,6 +193,26 @@ Jangan membuat asumsi, tanyakan jika kurang jelas.
   } catch (err) {
     console.error('Chat error:', err);
     return errorResponse(err.message, 500);
+  }
+}
+
+// ---------- HELPERS untuk konteks ----------
+async function getProjectContext(githubProjects, project) {
+  if (!project) return 'Tidak ada project yang dipilih.';
+  try {
+    const files = await githubProjects.listDirectory(project);
+    return `Project "${project}" berisi: ${files.map(f => f.name).join(', ')}`;
+  } catch {
+    return `Project "${project}" tidak ditemukan atau kosong.`;
+  }
+}
+
+async function getMemoryContext(githubMemory) {
+  try {
+    const mems = await githubMemory.listDirectory('');
+    return `Memory files: ${mems.map(f => f.name).join(', ')}`;
+  } catch {
+    return 'Tidak ada memory files.';
   }
 }
 
@@ -229,7 +243,6 @@ async function executeTool(tool, githubProjects, githubMemory) {
         return { success: true, content: data.content };
       }
       case 'commit_project': {
-        // commit is implicit with save_file, but we acknowledge
         return { success: true, message: `Commit "${args.message}" acknowledged.` };
       }
       case 'save_memory': {
@@ -256,4 +269,4 @@ async function executeTool(tool, githubProjects, githubMemory) {
   } catch (err) {
     return { success: false, error: err.message };
   }
-  }
+          }
