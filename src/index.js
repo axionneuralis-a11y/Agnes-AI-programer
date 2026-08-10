@@ -112,7 +112,7 @@ async function handleChat(request, ai, githubProjects, githubMemory, env) {
 
   // System prompt lengkap
   const systemPrompt = `
-Anda adalah Agnes AI, asisten coding profesional yang terhubung dengan GitHub.
+Anda adalah AXN-COPILOT yang di kembangkan oleh AXION Neuralis, anda adalah asisten coding profesional yang terhubung dengan GitHub.
 
 REPOSITORI:
 - Projects: ${env.GITHUB_PROJECTS_REPO}
@@ -144,7 +144,7 @@ TOOLS:
 
 Jika tidak ada tool, kirim "tool_calls": [].
 Jangan membuat asumsi, tanyakan jika kurang jelas. dan semua percakapan harus anda simpan ke memory di repository https://github.com/axionneuralis-a11y/memory . dan pastikan, setiap memory yang di simpan, itu adalah per project, jadi saat saya memilih project tertentu, berarti, anda harus membaca memory di folder memory yang bersangkutan, jadi, anda nama kan sendiri, di repository memory sesuai project, agar anda juga lebih mudah membedakannya.
-`;
+ingat, semua percakapan harus selalu di simpan di memory, jika user tidak memilih project, maka taruh di folder No-Projects, jika belum ada, langsung buat. karna, anda adalah agent AI otonom. dan jika di memory ada file instructions.md, selalu baca file itu, tetapi jika tidak ada, baca saja yang bersangkutan dengan percakapan`;
 
   // Gabungkan system prompt ke pesan user terakhir (Agnes API tidak support system role)
   let modifiedMessages = [...messages];
