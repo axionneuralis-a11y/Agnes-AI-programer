@@ -78,7 +78,12 @@ async function sendMessage() {
   isProcessing = true;
   sendBtn.disabled = true;
 
+  // Tampilkan di UI
   addMessage('user', text);
+
+  // **PERBAIKAN**: tambahkan pesan user ke array messages SEBELUM fetch
+  messages.push({ role: 'user', content: text });
+
   const loadId = addLoading();
 
   try {
@@ -90,9 +95,17 @@ async function sendMessage() {
     const data = await resp.json();
     removeLoading(loadId);
 
-    if (data.error) { addMessage('assistant', `❌ ${data.error}`); return; }
+    if (data.error) {
+      addMessage('assistant', `❌ ${data.error}`);
+      // Hapus pesan user yang gagal
+      messages.pop();
+      return;
+    }
 
     addMessage('assistant', data.response);
+    // Tambahkan pesan assistant ke array messages
+    messages.push({ role: 'assistant', content: data.response });
+
     if (data.tool_results?.length) {
       for (const r of data.tool_results) {
         const icon = r.success ? '✅' : '❌';
@@ -103,11 +116,11 @@ async function sendMessage() {
       updateProjectSelect();
     }
 
-    messages.push({ role: 'user', content: text });
-    messages.push({ role: 'assistant', content: data.response });
   } catch (err) {
     removeLoading(loadId);
     addMessage('assistant', `❌ ${err.message}`);
+    // Hapus pesan user jika gagal
+    messages.pop();
   }
 
   isProcessing = false;
@@ -227,4 +240,4 @@ function openModal(type) {
 function closeModal() { modal.classList.add('hidden'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-console.log('🚀 AXN Copilot loaded'); 
+console.log('🚀 AXN Copilot loaded');
