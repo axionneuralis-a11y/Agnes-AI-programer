@@ -9,8 +9,6 @@ GITHUB_PROJECTS_REPO = "axionneuralis-a11y/projects"
 GITHUB_MEMORY_REPO   = "axionneuralis-a11y/memory"
 AGNES_API_URL_1 = "https://apihub.agnes-ai.com/v1/chat/completions"
 AGNES_API_URL_2 = "https://apihub.agnes-ai.com/v1/chat/completions"
-
-# Secrets (set via `wrangler secret put <nama>`)
-# AGNES_API_KEY_1
-# AGNES_API_KEY_2
-# GITHUB_TOKEN
+AGNES_API_KEY_1 = "key-1"
+AGNES_API_KEY_2 = "key-2"
+GITHUB_TOKEN = "gh-token"
