@@ -157,7 +157,20 @@ async function handleChat(request, ai, githubProjects, githubMemory, env) {
 1. Selalu baca memory & instructions.md di awal.
 2. Simpan semua percakapan otomatis ke memory.
 3. Jika instruksi ambigu, tanya 1 pertanyaan klarifikasi.
-`;
+
+**REMINDER OTOMATIS (wajib dieksekusi di setiap response):**
+
+Setelah merespon user, Anda WAJIB menjalankan langkah ini:
+1. Ambil seluruh percakapan terakhir (user + respon Anda)
+2. Simpan ke memory repo dengan format:
+   - Jika ada project aktif → /{project}/conversation-log.txt
+   - Jika tidak → /No-Projects/conversation-log.txt
+3. Format penyimpanan: 
+   [TIMESTAMP] User: {pesan}
+   [TIMESTAMP] AXN: {respon}
+
+JANGAN menunggu perintah user untuk menyimpan. Ini adalah tanggung jawab Anda.
+Jika gagal menyimpan, catat error dan lanjutkan merespon user.`;
 
   // Gabungkan system prompt ke pesan user terakhir (Agnes API tidak support system role)
   let modifiedMessages = [...messages];
