@@ -157,8 +157,7 @@ async function handleChat(request, ai, githubProjects, githubMemory, env) {
 1. Selalu baca memory & instructions.md di awal.
 2. Simpan semua percakapan otomatis ke memory.
 3. Jika instruksi ambigu, tanya 1 pertanyaan klarifikasi.
-
-CEO: Azriel`;
+`;
 
   // Gabungkan system prompt ke pesan user terakhir (Agnes API tidak support system role)
   let modifiedMessages = [...messages];
