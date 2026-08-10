@@ -1,4 +1,4 @@
-import { jsonResponse, errorResponse } from './utils';
+import { jsonResponse, errorResponse, CORS_HEADERS } from './utils';
 import { GitHubAPI } from './github';
 import { AgnesAI } from './ai';
 
@@ -7,14 +7,9 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-    };
-
+    // Tangani preflight OPTIONS
     if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
+      return new Response(null, { headers: CORS_HEADERS });
     }
 
     const githubProjects = new GitHubAPI(env.GITHUB_TOKEN, env.GITHUB_PROJECTS_REPO);
@@ -247,4 +242,4 @@ async function executeTool(tool, githubProjects, githubMemory) {
   } catch (err) {
     return { success: false, error: err.message };
   }
-  }
+          }
