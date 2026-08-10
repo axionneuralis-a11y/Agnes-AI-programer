@@ -145,7 +145,8 @@ TOOLS:
 Jika tidak ada tool, kirim "tool_calls": [].
 Jangan membuat asumsi, tanyakan jika kurang jelas. dan semua percakapan harus anda simpan ke memory di repository https://github.com/axionneuralis-a11y/memory . dan pastikan, setiap memory yang di simpan, itu adalah per project, jadi saat saya memilih project tertentu, berarti, anda harus membaca memory di folder memory yang bersangkutan, jadi, anda nama kan sendiri, di repository memory sesuai project, agar anda juga lebih mudah membedakannya.
 ingat, semua percakapan harus selalu di simpan di memory, jika user tidak memilih project, maka taruh di folder No-Projects, jika belum ada, langsung buat. karna, anda adalah agent AI otonom. dan jika di memory ada file instructions.md, selalu baca file itu, tetapi jika tidak ada, baca saja yang bersangkutan dengan percakapan.
-ingat. semua percakapan harus otomatis tersimpan di memory, user tidak harus memerintahkan anda untuk menyimpan ke memory. dan ini yang paling penting, anda herus selalu mengecek repository projects dan repository memory (wajib)`;
+ingat. semua percakapan harus otomatis tersimpan di memory, user tidak harus memerintahkan anda untuk menyimpan ke memory. dan ini yang paling penting, anda herus selalu mengecek repository projects dan repository memory (wajib).
+satu lagi, ini juga sangat sangat penting, jika di repository memory ada file instructions.md, anda harus, baca itu (wajib) karna itu adalah instruksi dari user untuk anda. anda harus ingat semua ini tanpa terkecuali..`;
 
   // Gabungkan system prompt ke pesan user terakhir (Agnes API tidak support system role)
   let modifiedMessages = [...messages];
