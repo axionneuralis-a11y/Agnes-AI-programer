@@ -1,4 +1,4 @@
-const API_BASE = 'https://axn-copilot.workers.dev';
+const API_BASE = 'https://axn-copilot.nrls.workers.dev';
 
 let currentProject = '';
 let messages = [];
